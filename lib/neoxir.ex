@@ -8,6 +8,10 @@ defmodule Neoxir do
     defstruct commit_url: "", errors: [], expires: %{}
   end
 
+  defmodule Response do
+    defstruct status_code: 0, results: [], errors: []
+  end
+
   def create_session(url \\ "http://localhost:7474/") do
     {:ok, data} = HTTPoison.get(url)
     {:ok, body} = JSX.decode(data.body)
@@ -32,7 +36,8 @@ defmodule Neoxir do
       {:ok, payload} = JSX.encode [statements: statements]
       url = "#{tx_end_point_url}/commit"
       {:ok, response} = HTTPoison.post(url, payload, @headers)
-      response
+      {:ok, body } = JSX.decode response.body
+      %Response{status_code: response.status_code ,results: body["results"], errors: body["errors"]}
     end
 
     # Commit an open transaction
