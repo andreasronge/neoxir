@@ -1,6 +1,11 @@
 defmodule Neoxir do
+
   defmodule Session do
     defstruct root_url: "", data_url: "", tx_end_point_url: "", root_resource: %{}
+  end
+
+  defmodule Transaction do
+    defstruct commit_url: "", errors: [], expires: %{}
   end
 
   def create_session(url \\ "http://localhost:7474/") do
@@ -12,33 +17,43 @@ defmodule Neoxir do
     {:ok, body} = JSX.decode(data.body)
 
     # body
-    {:ok, %Session{root_url: url, data_url: data_url, root_resource: body, tx_end_point_url: body["transaction"]}}
+    %Session{root_url: url, data_url: data_url, root_resource: body, tx_end_point_url: body["transaction"]}
   end
 
-  @http_headers %{
-    "Accept" => "application/json; charset=UTF-8",
-    "Content-Type" => "application/json"
-  }
 
 
   defmodule TxEndPoint do
+    @headers %{"Accept" => "application/json; charset=UTF-8", "Content-Type" => "application/json"}
+
     # Begin and commit a transaction in one request
     # If there is no need to keep a transaction open across multiple HTTP requests, 
     # you can begin a transaction, execute statements, and commit with just a single HTTP request.
-    def commit(session, statements) do
-      {:ok, payload} = JSX.encode [statements: [statement: "CREATE (n) RETURN id(n)"]]
-      url = "#{session.tx_end_point_url}/commit"
-      HTTPoison.post(url, payload, %{"Accept" => "application/json", "Content-Type" => "application/json"})
+    def commit(%Session{tx_end_point_url: tx_end_point_url}, statements) do
+      {:ok, payload} = JSX.encode [statements: statements]
+      url = "#{tx_end_point_url}/commit"
+      {:ok, response} = HTTPoison.post(url, payload, @headers)
+      response
+    end
+
+    # Commit an open transaction
+    # Given you have an open transaction, you can send a commit request. 
+    # Optionally, you submit additional statements along with the request that will be executed before committing the transaction.
+    def commit(transaction, statements) do
     end
 
     # Begin a transaction
-    # You begin a new transaction by posting zero or more Cypher statements to the transaction endpoint. The server will respond with the result of your statements, as well as the location of your open transaction.
-    def begin_tx(session, statements) do
-
+    # You begin a new transaction by posting zero or more Cypher statements to the transaction endpoint. 
+    # The server will respond with the result of your statements, as well as the location of your open transaction.
+    def begin_tx(%Session{tx_end_point_url: tx_end_point_url}, statements \\ []) do
+      {:ok, payload} = JSX.encode [statements: statements]
+      {:ok, response} = HTTPoison.post(tx_end_point_url, payload, @headers)
+      {:ok, body } = JSX.decode response.body
+      %Transaction{commit_url: body["commit"], errors: body["errors"], expires: body["transaction"]["expires"]}
     end
 
     # Execute statements in an open transaction
-    # Given that you have an open transaction, you can make a number of requests, each of which executes additional statements, and keeps the transaction open by resetting the transaction timeout.
+    # Given that you have an open transaction, you can make a number of requests, each of which executes additional statements,
+    # and keeps the transaction open by resetting the transaction timeout.
     def execute(transaction, statements) do
     end
 
@@ -54,10 +69,6 @@ defmodule Neoxir do
     end
 
 
-    # Commit an open transaction
-    # Given you have an open transaction, you can send a commit request. Optionally, you submit additional statements along with the request that will be executed before committing the transaction.
-    def commit(transaction, statements) do
-    end
 
     # Rollback an open transaction
     # Given that you have an open transaction, you can send a roll back request. The server will roll back the transaction.
