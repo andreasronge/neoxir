@@ -1,11 +1,7 @@
-Neoxir
-======
-
-# What ?
+# Neoxir
+[![Build Status](https://travis-ci.org/andreasronge/neoxir.svg?branch=master)](https://travis-ci.org/andreasronge/neoxir)
 
 An Elixir driver for the Neo4j Graph Database, see www.neo4j.org
-
-# How ?
 
 ## Create a session
 
