@@ -17,7 +17,7 @@ session = Neoxir.create_session! # http://localhost:7474 is default
 
 ## Transactions
 
-All cypher operations are executed in a transaction using a session.
+All cypher operations are executed in transactions.
 
 Commit a single cypher query
 
@@ -28,7 +28,7 @@ Commit a single cypher query
 response = Neoxir.commit!(session, statement: "CREATE (n) RETURN ID(n)") 
 ```
 
-Commit multiple cypher queries, TODO
+Commit multiple cypher queries:
 
 ```elixir
 {:ok, response} = Neoxir.commit(session, [statement: "CREATE (n) RETURN ID(n)", statement: "..."]) 
