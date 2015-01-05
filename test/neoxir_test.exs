@@ -30,7 +30,7 @@ defmodule NeoxirTest do
 
     {:ok, response} = commit(create_session, statements)
 
-    [first_result, second_result ] = response
+    [_, second_result ] = response
 
     assert length(second_result) == 1
     first_row = List.first(second_result)
@@ -56,6 +56,7 @@ defmodule NeoxirTest do
     assert response == [%{"code" => "Neo.ClientError.Statement.InvalidSyntax",
    "message" => "Invalid input 'Q': expected <init> (line 1, column 1)\n\"QQCREATE (n) RETURN ID(n) as x1\"\n ^"}]
   end
+
 
   # commit!
 

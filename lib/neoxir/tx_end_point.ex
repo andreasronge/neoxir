@@ -17,11 +17,13 @@ defmodule Neoxir.TxEndPoint do
   end
 
 
+  # TODO
+
   # Commit an open transaction
   # Given you have an open transaction, you can send a commit request. 
   # Optionally, you submit additional statements along with the request that will be executed before committing the transaction.
-  def commitx(transaction, statements) do
-  end
+  # def commit(transaction, statements) do
+  # end
 
   # Begin a transaction
   # You begin a new transaction by posting zero or more Cypher statements to the transaction endpoint. 
@@ -37,7 +39,7 @@ defmodule Neoxir.TxEndPoint do
   # Execute statements in an open transaction
   # Given that you have an open transaction, you can make a number of requests, each of which executes additional statements,
   # and keeps the transaction open by resetting the transaction timeout.
-  def execute(transaction, statements) do
+  def execute(_transaction, _statements) do
   end
 
 
@@ -48,14 +50,14 @@ defmodule Neoxir.TxEndPoint do
   # Reset transaction timeout of an open transaction
   # Every orphaned transaction is automatically expired after a period of inactivity. This may be prevented by resetting the transaction timeout.
   # The timeout may be reset by sending a keep-alive request to the server that executes an empty list of statements. This request will reset the transaction timeout and return the new time at which the transaction will expire as an RFC1123 formatted timestamp value in the “transaction” section of the response.
-  def reset(transaction) do
+  def reset(_transaction) do
   end
 
 
 
   # Rollback an open transaction
   # Given that you have an open transaction, you can send a roll back request. The server will roll back the transaction.
-  def rollback(transaction) do
+  def rollback(_transaction) do
   end
 
 end
