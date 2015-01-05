@@ -22,7 +22,12 @@ defmodule Neoxir do
     iex> Neoxir.create_session |> Neoxir.commit(statement: "MATCH n WHERE ID(n) = 0 RETURN ID(n) as x")
     {:ok, [%{x: 0}]}
   """
-  def commit(session, statements) do
+  def commit(session, [head|_] = statements) when is_list head  do
+    response = Neoxir.TxEndPoint.commit(session, statements)
+    Neoxir.CypherResponse.to_rows(response)
+  end
+
+  def commit(session, statements) when is_list statements do
     response = Neoxir.TxEndPoint.commit(session, statements)
     case Neoxir.CypherResponse.to_rows(response) do
       {:ok, rows} -> {:ok, List.first(rows)}

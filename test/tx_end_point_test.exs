@@ -5,16 +5,28 @@ defmodule NeoxirTxEndPointTest do
 
   # Neoxir.TxEndPoint.commit
 
-  # Clear DB: START n = node(*) OPTIONAL MATCH n-[r]-() WHERE ID(n)>0 DELETE n, r;
 
-  test "Neoxir.TxEndPoint.commit: a valid cypher query" do
-    response = Neoxir.TxEndPoint.commit(create_session, statement: "CREATE (n) RETURN ID(n)") # , resultDataContents: [ "REST" ]
+  test "Neoxir.TxEndPoint.commit: many valid cypher queries" do
+    statements = [
+      [statement: "CREATE (n) RETURN ID(n) as x1"],
+      [statement: "CREATE (n) RETURN ID(n) as x2"]
+    ]
+
+    response = Neoxir.TxEndPoint.commit(create_session, statements) # , resultDataContents: [ "REST" ]
     assert response.status_code == 200
     assert String.valid?(response.body)
   end
 
+
+  test "Neoxir.TxEndPoint.commit: a valid cypher query" do
+    response = Neoxir.TxEndPoint.commit(create_session, statement: "CREATE (n) RETURN ID(n)") 
+    assert response.status_code == 200
+    assert String.valid?(response.body)
+  end
+
+
   test "Neoxir.TxEndPoint.commit and to_rows" do
-    response = Neoxir.TxEndPoint.commit(create_session, statement: "CREATE (n) RETURN ID(n) as x") # , resultDataContents: [ "REST" ]
+    response = Neoxir.TxEndPoint.commit(create_session, statement: "CREATE (n) RETURN ID(n) as x") 
     {:ok, rows} = Neoxir.CypherResponse.to_rows(response) 
 
     assert length(rows) == 1
@@ -27,9 +39,8 @@ defmodule NeoxirTxEndPointTest do
   end
 
 
-
   test "commit an invalid cypher query" do
-    response = Neoxir.TxEndPoint.commit(create_session, statement: "CREATEA (n) RETURN ID(n)") # , resultDataContents: [ "REST" ]
+    response = Neoxir.TxEndPoint.commit(create_session, statement: "CREATEA (n) RETURN ID(n)")
     assert response.status_code == 200
     assert String.valid?(response.body)
   end

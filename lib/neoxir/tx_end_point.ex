@@ -2,20 +2,13 @@
 defmodule Neoxir.TxEndPoint do
   @headers %{"Accept" => "application/json; charset=UTF-8", "Content-Type" => "application/json"}
 
+
   # Begin and commit a transaction in one request
   # If there is no need to keep a transaction open across multiple HTTP requests, 
   # you can begin a transaction, execute statements, and commit with just a single HTTP request.
   def commit(%Neoxir.Session{tx_end_point_url: tx_end_point_url}, [head|_] = statements) when is_list head do
-    {:ok, payload}  = JSX.encode statements: statements
-    {:ok, response} = HTTPoison.post("#{tx_end_point_url}/commit", payload, @headers)
-    # to_result = fn %{"columns" => columns, "data" => [%{"row" => rows}]} -> %CypherResult{columns: columns, row: rows} end
-    # results = Enum.map(body["results"], to_result)
-
-    # to_errors = fn %{"code" => code, "message" => message} -> %CypherError{code: code, message: message} end
-    # errors = Enum.map(body["errors"], to_errors)
-
-    # {:ok, body } = JSX.decode response.body
-
+    payload = JSX.encode! statements: statements
+    response = HTTPoison.post!("#{tx_end_point_url}/commit", payload, @headers)
     %Neoxir.CypherResponse{status_code: response.status_code, body: response.body} # results: body["results"], errors: body["errors"]
   end
 

@@ -22,14 +22,43 @@ defmodule NeoxirTest do
     assert is_number(first_row[:x])
   end
 
+  test "commit: many valid statements" do
+    statements = [
+      [statement: "CREATE (n) RETURN ID(n) as x1"],
+      [statement: "CREATE (n) RETURN ID(n) as x2"]
+    ]
+
+    {:ok, response} = commit(create_session, statements)
+
+    [first_result, second_result ] = response
+
+    assert length(second_result) == 1
+    first_row = List.first(second_result)
+    assert Dict.keys(first_row) == [:x2]
+    assert is_number(first_row[:x2])
+  end
+
+
   test "commit: single invalid statement" do
     {:error, Neoxir.CypherResponse, reason} = commit(create_session, statement: "CREATQQQ (n) RETURN ID(n) as x")
     assert reason["code"] == "Neo.ClientError.Statement.InvalidSyntax"
     assert Regex.match?(~r/Invalid input/, reason["message"])
   end
 
+
+  test "commit: many invalid statements" do
+    statements = [
+      [statement: "QQCREATE (n) RETURN ID(n) as x1"],
+      [statement: "AAAAREATE (n) RETURN ID(n) as x2"]
+    ]
+
+    {:error, _, response} = commit(create_session, statements)
+    assert response == [%{"code" => "Neo.ClientError.Statement.InvalidSyntax",
+   "message" => "Invalid input 'Q': expected <init> (line 1, column 1)\n\"QQCREATE (n) RETURN ID(n) as x1\"\n ^"}]
+  end
+
   # commit!
-  
+
   test "commit!: single valid statement" do
     response = commit!(create_session, statement: "CREATE (n) RETURN ID(n) as x")
     assert length(response) == 1
