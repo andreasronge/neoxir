@@ -5,7 +5,11 @@ defmodule Neoxir.Mixfile do
     [app: :neoixr,
      version: "0.0.1",
      elixir: "~> 1.0",
-     deps: deps]
+     deps: deps, 
+     package: package,
+     source_url: "https://github.com/andreasronge/neoxir",
+     description: "An Elixir driver for the Neo4j Graph Database, see www.neo4j.org",
+     docs: [readme: true, main: "README"]]
   end
 
   # Configuration for the OTP application
@@ -29,6 +33,12 @@ defmodule Neoxir.Mixfile do
       { :httpoison, "~> 0.5"},
       { :exjsx, "~> 3.1"},
       { :meck, "~> 0.8.2", only: :test },
+      { :ex_doc, "~> 0.7", only: :docs }
     ]
+  end
+
+  defp package do
+    %{licenses: ["MIT"],
+      links: %{"Github" => "https://github.com/andreasronge/neoxir"}}
   end
 end
