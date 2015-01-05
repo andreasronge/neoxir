@@ -28,6 +28,8 @@ defmodule Neoxir.Mixfile do
     [ 
       { :httpoison, "~> 0.5"},
       { :exjsx, "~> 3.1"},
+      { :json, "~> 0.3"},
+      { :jsex, "~> 2.0.0"},
       { :meck, "~> 0.8.2", only: :test },
       { :shouldi, "~> 0.2.1", only: :test } 
     ]

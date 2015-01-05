@@ -8,8 +8,48 @@ defmodule Neoxir do
     defstruct commit_url: "", errors: [], expires: %{}
   end
 
-  defmodule Response do
-    defstruct status_code: 0, results: [], errors: []
+  defmodule CypherResult do
+    defstruct columns: [], rows: []
+  end
+
+  defmodule CypherResponse do
+    defstruct status_code: 0, body: ""
+
+
+    def to_rows(%CypherResponse{body: body}) do
+      {:ok, r} = JSX.decode(body)
+      result = r["results"]
+      Enum.map(result, &(map_result(&1)))
+    end
+
+    defp map_result(result) do
+      columns = Enum.map(result["columns"], &(String.to_atom(&1)))
+      rows = rows(result["data"])
+      IO.inspect rows
+      Enum.map(rows, &(map_row(columns, &1)))
+    end
+
+    defp map_row(columns, row) do
+      {result, _} = Enum.reduce(row, {%{}, columns}, fn value, {dict, [h|t]} -> {Dict.put(dict, h, value), t} end)
+      result
+    end
+
+    defp rows(data) do
+      Enum.map(data, fn %{"row" => row} -> row end)
+    end
+
+  end
+
+
+  defmodule CypherError do
+    defstruct code: "", message: ""
+  end
+
+
+  def commit(session, statements) do
+    response = Neoxir.TxEndPoint.commit(session, statements)
+    rows = CypherResponse.to_rows(response)
+    {:ok, List.first(rows)}
   end
 
   def create_session(url \\ "http://localhost:7474/") do
@@ -25,34 +65,45 @@ defmodule Neoxir do
   end
 
 
-
   defmodule TxEndPoint do
     @headers %{"Accept" => "application/json; charset=UTF-8", "Content-Type" => "application/json"}
 
     # Begin and commit a transaction in one request
     # If there is no need to keep a transaction open across multiple HTTP requests, 
     # you can begin a transaction, execute statements, and commit with just a single HTTP request.
-    def commit(%Session{tx_end_point_url: tx_end_point_url}, statements) do
-      {:ok, payload} = JSX.encode [statements: statements]
-      url = "#{tx_end_point_url}/commit"
-      {:ok, response} = HTTPoison.post(url, payload, @headers)
-      {:ok, body } = JSX.decode response.body
-      %Response{status_code: response.status_code ,results: body["results"], errors: body["errors"]}
+    def commit(%Session{tx_end_point_url: tx_end_point_url}, [head|_] = statements) when is_list head do
+      {:ok, payload}  = JSX.encode statements: statements
+      {:ok, response} = HTTPoison.post("#{tx_end_point_url}/commit", payload, @headers)
+      # to_result = fn %{"columns" => columns, "data" => [%{"row" => rows}]} -> %CypherResult{columns: columns, row: rows} end
+      # results = Enum.map(body["results"], to_result)
+
+      # to_errors = fn %{"code" => code, "message" => message} -> %CypherError{code: code, message: message} end
+      # errors = Enum.map(body["errors"], to_errors)
+
+      # {:ok, body } = JSX.decode response.body
+
+      %CypherResponse{status_code: response.status_code, body: response.body} # results: body["results"], errors: body["errors"]
     end
+
+    def commit(session = %Session{}, statement) do 
+      commit(session, [statement])
+    end
+
 
     # Commit an open transaction
     # Given you have an open transaction, you can send a commit request. 
     # Optionally, you submit additional statements along with the request that will be executed before committing the transaction.
-    def commit(transaction, statements) do
+    def commitx(transaction, statements) do
     end
 
     # Begin a transaction
     # You begin a new transaction by posting zero or more Cypher statements to the transaction endpoint. 
     # The server will respond with the result of your statements, as well as the location of your open transaction.
     def begin_tx(%Session{tx_end_point_url: tx_end_point_url}, statements \\ []) do
-      {:ok, payload} = JSX.encode [statements: statements]
+      {:ok, payload}  = JSX.encode [statements: statements]
       {:ok, response} = HTTPoison.post(tx_end_point_url, payload, @headers)
-      {:ok, body } = JSX.decode response.body
+      {:ok, body }    = JSX.decode response.body
+
       %Transaction{commit_url: body["commit"], errors: body["errors"], expires: body["transaction"]["expires"]}
     end
 
