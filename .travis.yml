@@ -1,4 +1,3 @@
-script: "bundle exec rake neo4j:install['community-2.1.6'] neo4j:start default --trace"
 language: erlang
 notifications:
   recipients:
