@@ -54,14 +54,14 @@ defmodule Neoxir do
   Creates a new neo4j session using the given url to the database.
   """
   def create_session(url \\ "http://localhost:7474/") do
-    {:ok, data} = HTTPoison.get(url)
-    {:ok, body} = JSX.decode(data.body)
+    data = HTTPoison.get!(url)
+    body = JSX.decode!(data.body)
+
     data_url = body["data"]
 
-    {:ok, data} = HTTPoison.get(data_url)
-    {:ok, body} = JSX.decode(data.body)
+    data = HTTPoison.get!(data_url)
+    body = JSX.decode!(data.body)
 
-    # body
     %Session{root_url: url, data_url: data_url, root_resource: body, tx_end_point_url: body["transaction"]}
   end
 
