@@ -25,7 +25,10 @@ defmodule Neoxir.CypherResponse do
   end
 
   defp rows(data) do
-    Enum.map(data, fn %{"row" => row} -> row end)
+    Enum.map(data, fn 
+        %{"row"  => row}  -> row 
+        %{"rest" => rest} -> rest
+    end)
   end
 
 end

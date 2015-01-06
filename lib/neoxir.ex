@@ -29,6 +29,7 @@ defmodule Neoxir do
 
   def commit(session, statements) when is_list statements do
     response = Neoxir.TxEndPoint.commit(session, statements)
+
     case Neoxir.CypherResponse.to_rows(response) do
       {:ok, rows} -> {:ok, List.first(rows)}
       {:error, location, reasons} -> {:error, location, List.first(reasons)}

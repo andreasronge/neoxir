@@ -53,6 +53,15 @@ Single statement
 # => [%{x: 0}, %{x: 1}, %{x: 2}]
 ```
 
+REST response
+
+```elixir
+{:ok, response} = commit(session, statement: "CREATE (n {name: 'andreas'}) RETURN n", resultDataContents: [ "REST" ])
+# => [%{n: %{"all_relationships" => "http://localhost:7474/db/data/node/886/relationships/all",
+#    "all_typed_relationships" => "http://localhost:7474/db/data/node/886/relationships/all/{-list|&|types}",
+# ...
+```
+
 Multiple statements
 
 ```

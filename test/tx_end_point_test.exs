@@ -11,26 +11,35 @@ defmodule NeoxirTxEndPointTest do
      end
 
 
-     test "Neoxir.TxEndPoint.commit: many valid cypher queries", %{session: session}  do
+     test "many valid cypher queries", %{session: session}  do
       statements = [
         [statement: "CREATE (n) RETURN ID(n) as x1"],
         [statement: "CREATE (n) RETURN ID(n) as x2"]
       ]
 
-      response = Neoxir.TxEndPoint.commit(session, statements) # , resultDataContents: [ "REST" ]
+      response = Neoxir.TxEndPoint.commit(session, statements)
       assert response.status_code == 200
       assert String.valid?(response.body)
     end
 
 
-    test "Neoxir.TxEndPoint.commit: a valid cypher query", %{session: session} do
+    test "with rest response", %{session: session} do
+      statement = "CREATE (TheMatrix:Movie {title:'The Matrix', released:1999, tagline:'Welcome to the Real World'}) return TheMatrix"
+      response = Neoxir.TxEndPoint.commit(session, statement: statement, resultDataContents: [ "REST" ])
+      assert response.status_code == 200
+      assert String.valid?(response.body)
+      assert Regex.match?(~r/metadata/, response.body)
+    end
+
+
+    test "a valid cypher query", %{session: session} do
       response = Neoxir.TxEndPoint.commit(session, statement: "CREATE (n) RETURN ID(n)") 
       assert response.status_code == 200
       assert String.valid?(response.body)
     end
 
 
-    test "Neoxir.TxEndPoint.commit and to_rows", %{session: session} do
+    test "commit and to_rows", %{session: session} do
       response = Neoxir.TxEndPoint.commit(session, statement: "CREATE (n) RETURN ID(n) as x") 
       {:ok, rows} = Neoxir.CypherResponse.to_rows(response) 
 
@@ -44,7 +53,7 @@ defmodule NeoxirTxEndPointTest do
     end
 
 
-    test "commit an invalid cypher query", %{session: session} do
+    test "an invalid cypher query", %{session: session} do
       response = Neoxir.TxEndPoint.commit(session, statement: "CREATEA (n) RETURN ID(n)")
       assert response.status_code == 200
       assert String.valid?(response.body)

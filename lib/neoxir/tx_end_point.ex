@@ -29,9 +29,9 @@ defmodule Neoxir.TxEndPoint do
   # You begin a new transaction by posting zero or more Cypher statements to the transaction endpoint. 
   # The server will respond with the result of your statements, as well as the location of your open transaction.
   def begin_tx(%Neoxir.Session{tx_end_point_url: tx_end_point_url}, statements \\ []) do
-    {:ok, payload}  = JSX.encode [statements: statements]
-    {:ok, response} = HTTPoison.post(tx_end_point_url, payload, @headers)
-    {:ok, body }    = JSX.decode response.body
+    payload  = JSX.encode! statements: statements
+    response = HTTPoison.post!(tx_end_point_url, payload, @headers)
+    body     = JSX.decode! response.body
 
     %Neoxir.Transaction{commit_url: body["commit"], errors: body["errors"], expires: body["transaction"]["expires"]}
   end

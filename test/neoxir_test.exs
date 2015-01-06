@@ -35,6 +35,15 @@ defmodule NeoxirTest do
       assert is_number(first_row[:x])
     end
 
+    test "commit: with REST response", %{session: session}  do
+      {:ok, rows} = commit(session, statement: "CREATE (n {name: 'andreas'}) RETURN n", resultDataContents: [ "REST" ])
+      assert length(rows) == 1
+      assert rows |> List.first |> Dict.keys == [:n]
+      assert rows |> List.first |> Dict.get(:n) |> Dict.get("data") == %{"name" => "andreas"}
+    end
+
+
+
     test "commit: many valid statements", %{session: session} do
       statements = [
         [statement: "CREATE (n) RETURN ID(n) as x1"],
@@ -80,6 +89,7 @@ defmodule NeoxirTest do
       assert Dict.keys(first_row) == [:x]
       assert is_number(first_row[:x])
     end
+
 
     test "commit!: invalid statement", %{session: session} do
       assert_raise Neoxir.CypherResponseError, ~r/Invalid input/, fn ->
