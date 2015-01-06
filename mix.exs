@@ -8,8 +8,7 @@ defmodule Neoxir.Mixfile do
      deps: deps, 
      package: package,
      source_url: "https://github.com/andreasronge/neoxir",
-     description: "An Elixir driver for the Neo4j Graph Database, see www.neo4j.org",
-     docs: [readme: true, main: "README"]]
+     description: "An Elixir driver for the Neo4j Graph Database, see www.neo4j.org"]
   end
 
   # Configuration for the OTP application
