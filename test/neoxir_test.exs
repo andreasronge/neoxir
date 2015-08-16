@@ -74,11 +74,10 @@ defmodule NeoxirTest do
         [statement: "AAAAREATE (n) RETURN ID(n) as x2"]
       ]
 
-      {:error, _, response} = commit(session, statements)
-      assert response == [%{"code" => "Neo.ClientError.Statement.InvalidSyntax",
-     "message" => "Invalid input 'Q': expected <init> (line 1, column 1)\n\"QQCREATE (n) RETURN ID(n) as x1\"\n ^"}]
+      {:error, _, [response|_]} = commit(session, statements)
+      assert response["code"] == "Neo.ClientError.Statement.InvalidSyntax"
+      assert Regex.match?(~r/Invalid input/, response["message"])
     end
-
 
     # commit!
 
