@@ -28,20 +28,17 @@ defmodule NeoxirTest do
     # commit
 
     test "commit: single valid statement", %{session: session} do
-      {:ok, response} = commit(session, statement: "CREATE (n) RETURN ID(n) as x")
-      assert length(response) == 1
-      first_row = List.first(response)
-      assert Dict.keys(first_row) == [:x]
-      assert is_number(first_row[:x])
+      {:ok, [response]} = commit(session, statement: "CREATE (n) RETURN ID(n) as x")
+      assert Dict.keys(response) == [:x]
+      assert is_number(response[:x])
     end
+
 
     test "commit: with REST response", %{session: session}  do
-      {:ok, rows} = commit(session, statement: "CREATE (n {name: 'andreas'}) RETURN n", resultDataContents: [ "REST" ])
-      assert length(rows) == 1
-      assert rows |> List.first |> Dict.keys == [:n]
-      assert rows |> List.first |> Dict.get(:n) |> Dict.get("data") == %{"name" => "andreas"}
+      {:ok, [response]} = commit(session, statement: "CREATE (n {name: 'andreas'}) RETURN n", resultDataContents: [ "REST" ])
+      assert response |> Dict.keys == [:n]
+      assert response |> Dict.get(:n) |> Dict.get("data") == %{"name" => "andreas"}
     end
-
 
 
     test "commit: many valid statements", %{session: session} do
@@ -52,12 +49,10 @@ defmodule NeoxirTest do
 
       {:ok, response} = commit(session, statements)
 
-      [_, second_result ] = response
+      [_, [second_result]] = response
 
-      assert length(second_result) == 1
-      first_row = List.first(second_result)
-      assert Dict.keys(first_row) == [:x2]
-      assert is_number(first_row[:x2])
+      assert Dict.keys(second_result) == [:x2]
+      assert is_number(second_result[:x2])
     end
 
 
@@ -74,20 +69,17 @@ defmodule NeoxirTest do
         [statement: "AAAAREATE (n) RETURN ID(n) as x2"]
       ]
 
-      {:error, _, response} = commit(session, statements)
-      assert response == [%{"code" => "Neo.ClientError.Statement.InvalidSyntax",
-     "message" => "Invalid input 'Q': expected <init> (line 1, column 1)\n\"QQCREATE (n) RETURN ID(n) as x1\"\n ^"}]
+      {:error, _, [reason]} = commit(session, statements)
+      assert reason["code"] == "Neo.ClientError.Statement.InvalidSyntax"
+      assert Regex.match?(~r/Invalid input/, reason["message"])
     end
-
 
     # commit!
 
     test "commit!: single valid statement", %{session: session} do
-      response = commit!(session, statement: "CREATE (n) RETURN ID(n) as x")
-      assert length(response) == 1
-      first_row = List.first(response)
-      assert Dict.keys(first_row) == [:x]
-      assert is_number(first_row[:x])
+      [response] = commit!(session, statement: "CREATE (n) RETURN ID(n) as x")
+      assert Dict.keys(response) == [:x]
+      assert is_number(response[:x])
     end
 
 
