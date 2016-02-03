@@ -29,7 +29,7 @@ defmodule Neoxir.Mixfile do
   # Type `mix help deps` for more examples and options
   defp deps do
     [ 
-      { :httpoison, "~> 0.5"},
+      { :httpoison, "~> 0.8.0"},
       { :exjsx, "~> 3.1"},
       { :meck, "~> 0.8.2", only: :test },
       { :ex_doc, "~> 0.7", only: :docs }
