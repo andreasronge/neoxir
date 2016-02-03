@@ -7,7 +7,7 @@ defmodule Neoxir.Mixfile do
      elixir: "~> 1.0",
      deps: deps, 
      package: package,
-     source_url: "https://github.com/ASCrookes/neoxir",
+     source_url: "https://github.com/andreasronge/neoxir",
      description: "An Elixir driver for the Neo4j Graph Database, see www.neo4j.org"]
   end
 
@@ -38,6 +38,6 @@ defmodule Neoxir.Mixfile do
 
   defp package do
     %{licenses: ["MIT"],
-      links: %{"Github" => "https://github.com/ASCrookes/neoxir"}}
+      links: %{"Github" => "https://github.com/andreasronge/neoxir"}}
   end
 end
